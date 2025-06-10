@@ -1,10 +1,5 @@
 #!/bin/bash
 
-if [[ ! $(ps -o stat= -p $PPID) =~ "Ss" ]]; then
-    nohup "$0" "$@" > /dev/null 2>&1 &
-    exit 0
-fi
-
 # pidmon - 监控进程结束并发送钉钉通知
 # 用法: pidmon <PID> [进程描述]
 
