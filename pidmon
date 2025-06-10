@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# pidmon - 监控进程结束并发送钉钉通知
+# 用法: pidmon <PID> [进程描述]
+
+if [ $# -lt 1 ]; then
+    echo "用法: pidmon <PID> [进程描述]"
+    exit 1
+fi
+
+PID=$1
+DESCRIPTION=${2:-"PID $PID 进程"}
+
+# 读取配置文件
+CONFIG_FILE="$HOME/.ding.conf"
+if [ ! -f "$CONFIG_FILE" ]; then
+    echo "错误: 配置文件 $CONFIG_FILE 不存在"
+    echo "请先创建配置文件，包含钉钉机器人webhook_url和可选的secret"
+    exit 1
+fi
+source "$CONFIG_FILE"
+
+# 获取进程信息
+PROCESS_INFO=$(ps -p $PID -o cmd=)
+START_TIME=$(ps -p $PID -o lstart=)
+HOSTNAME=$(hostname)
+INTERNAL_IP=$(hostname -I | awk '{print $1}')
+
+# 记录开始监控时间
+MONITOR_START=$(date +%s)
+
+# 监控进程
+while kill -0 $PID 2>/dev/null; do
+    sleep 10
+done
+
+# 计算总耗时
+MONITOR_END=$(date +%s)
+DURATION=$((MONITOR_END - MONITOR_START))
+
+# 格式化耗时
+if [ $DURATION -lt 60 ]; then
+    DURATION_STR="${DURATION}秒"
+elif [ $DURATION -lt 3600 ]; then
+    minutes=$((DURATION / 60))
+    seconds=$((DURATION % 60))
+    DURATION_STR="${minutes}分${seconds}秒"
+else
+    hours=$((DURATION / 3600))
+    minutes=$(( (DURATION % 3600) / 60 ))
+    seconds=$((DURATION % 60))
+    DURATION_STR="${hours}小时${minutes}分${seconds}秒"
+fi
+
+# 构建钉钉消息
+MESSAGE=$(cat <<EOF
+{
+    "msgtype": "markdown",
+    "markdown": {
+        "title": "进程结束通知",
+        "text": "### 进程结束通知  \n  \
+**主机**: $HOSTNAME  \n  \
+**内网IP**: $INTERNAL_IP  \n  \
+**进程描述**: $DESCRIPTION  \n  \
+**进程命令**: \`$PROCESS_INFO\`  \n  \
+**进程启动时间**: $START_TIME  \n  \
+**监控持续时间**: $DURATION_STR  \n  \
+**结束时间**: $(date "+%Y-%m-%d %H:%M:%S")"
+    }
+}
+EOF
+)
+
+# 如果有secret，生成签名
+if [ -n "$secret" ]; then
+    timestamp=$(date +%s%3N)
+    sign=$(echo -ne "$timestamp\n$secret" | openssl dgst -sha256 -hmac "$secret" -binary | base64)
+    webhook_url="${webhook_url}&timestamp=${timestamp}&sign=${sign}"
+fi
+
+# 发送钉钉通知
+curl -s -X POST -H "Content-Type: application/json" -d "$MESSAGE" "$webhook_url"
