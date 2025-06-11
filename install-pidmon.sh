@@ -3,11 +3,16 @@
 # pidmon 安装脚本
 # 功能: 安装进程监控命令，当指定进程结束时发送钉钉通知
 
+echo "正在校验当前权限"
+    
 # 检查root权限
 if [ "$(id -u)" -ne 0 ]; then
     echo "请使用sudo运行此脚本: sudo bash $0"
     exit 1
 fi
+echo "当前权限足够！"
+
+echo "准备创建pidmon命令"
 
 # 创建pidmon脚本
 cat > /usr/local/bin/pidmon <<'EOF'
@@ -73,7 +78,7 @@ else
 fi
 
 # 构建钉钉消息
-MESSAGE=$(cat <<EOF
+MESSAGE=$(cat <<OUTER_EOF
 {
     "msgtype": "markdown",
     "markdown": {
@@ -88,7 +93,7 @@ MESSAGE=$(cat <<EOF
 **结束时间**: $(date "+%Y-%m-%d %H:%M:%S")"
     }
 }
-EOF
+OUTER_EOF
 
 # 如果有secret，生成签名
 if [ -n "$secret" ]; then
@@ -101,9 +106,14 @@ fi
 curl -s -X POST -H "Content-Type: application/json" -d "$MESSAGE" "$webhook_url"
 EOF
 
+echo "成功创建pidmon命令！"
+
+echo "准备赋予pidmon命令执行权限"
 # 设置权限
 chmod +x /usr/local/bin/pidmon
+echo "成功赋予pidmon命令执行权限！"
 
+echo "准备创建~/.ding.conf"
 # 创建示例配置文件（如果不存在）
 if [ ! -f "$HOME/.ding.conf" ]; then
     cat > "$HOME/.ding.conf" <<EOF
@@ -116,6 +126,7 @@ EOF
     echo "已创建示例配置文件: $HOME/.ding.conf"
     echo "请编辑该文件配置你的钉钉机器人Webhook"
 fi
+echo "成功创建~/.ding.conf！"
 
 echo "安装完成!"
 echo "pidmon 命令已安装到 /usr/local/bin/pidmon"
