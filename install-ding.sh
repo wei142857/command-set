@@ -93,7 +93,6 @@ message=$(cat <<EOF
     }
 }
 EOF
-)
 
 # 如果有secret，生成签名
 if [ -n "$secret" ]; then
