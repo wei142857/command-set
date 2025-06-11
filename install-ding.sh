@@ -110,9 +110,13 @@ response=$(curl -s -X POST -H "Content-Type: application/json" -d "$message" "$w
 exit $exit_code
 EOF
 
+echo "ding命令创建成功！"
+echo "准备赋予ding命令执行权限"
 # 设置权限
 chmod +x /usr/local/bin/ding
+echo "赋予ding命令执行权限成功！"
 
+echo "准备创建~/.ding.conf文件"
 # 创建配置目录和示例配置文件
 if [ ! -f "$HOME/.ding.conf" ]; then
     cat > "$HOME/.ding.conf" <<EOF
@@ -123,6 +127,7 @@ webhook_url=""
 secret=""
 EOF
 fi
+echo "成功创建~/.ding.conf文件！"
 
 echo "安装完成!"
 echo "ding 命令已安装到 /usr/local/bin/ding"
