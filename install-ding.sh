@@ -108,7 +108,7 @@ exit $exit_code
 EOF
 
 # 设置权限
-chmod +x /usr/local/bin/ding
+sudo chmod +x /usr/local/bin/ding
 
 # 创建配置目录和示例配置文件
 if [ ! -f "$HOME/.ding.conf" ]; then
