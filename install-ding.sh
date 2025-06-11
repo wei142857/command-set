@@ -133,4 +133,3 @@ echo "安装完成!"
 echo "ding 命令已安装到 /usr/local/bin/ding"
 echo "请编辑 ~/.ding.conf 配置你的钉钉机器人Webhook"
 echo "使用示例: nohup ding tar -cf backup.tar ./ > backup.log &"
-EOF
