@@ -9,6 +9,8 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+echo "准备创建ding命令"
+
 # 创建 ding 命令脚本
 cat > /usr/local/bin/ding <<'EOF'
 #!/bin/bash
@@ -77,7 +79,7 @@ else
 fi
 
 # 构建钉钉消息JSON
-message=$(cat <<EOF
+message=$(cat <<OUTER_EOF
 {
     "msgtype": "markdown",
     "markdown": {
@@ -92,7 +94,8 @@ message=$(cat <<EOF
 **工作目录**: \`$(pwd)\`"
     }
 }
-EOF
+OUTER_EOF
+)
 
 # 如果有secret，生成签名
 if [ -n "$secret" ]; then
@@ -108,7 +111,7 @@ exit $exit_code
 EOF
 
 # 设置权限
-sudo chmod +x /usr/local/bin/ding
+chmod +x /usr/local/bin/ding
 
 # 创建配置目录和示例配置文件
 if [ ! -f "$HOME/.ding.conf" ]; then
