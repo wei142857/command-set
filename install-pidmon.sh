@@ -111,10 +111,10 @@ chmod +x /usr/local/bin/pidmon
 if [ ! -f "$HOME/.ding.conf" ]; then
     cat > "$HOME/.ding.conf" <<EOF
 # 钉钉机器人Webhook地址
-webhook_url="https://oapi.dingtalk.com/robot/send?access_token=YOUR_ACCESS_TOKEN"
+webhook_url="https://oapi.dingtalk.com/robot/send?access_token=4351c11733248afae1252fec1608f959e358be22d42fa9e636a045e29092d858"
 
 # 可选: 消息签名密钥
-# secret="YOUR_SECRET"
+# secret="SEC7701727ce33928793ff90532248cc137f65d9dc3acfa42c065805376a7a78199"
 EOF
     echo "已创建示例配置文件: $HOME/.ding.conf"
     echo "请编辑该文件配置你的钉钉机器人Webhook"
@@ -122,5 +122,4 @@ fi
 
 
 echo "安装完成!"
-echo "pidmon 命令已安装到 /usr/local/bin/pidmon"
 echo "使用示例: pidmon 12345 \"进程描述\""
